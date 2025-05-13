@@ -1,0 +1,20 @@
+{
+  "realm": "ridivi-aegis",
+  "auth-server-url": "https://auth.ridivipay.com/realms/ridivi-aegis",
+  "resource": "ridivipay-admin-api",
+  "credentials": {
+    "secret": "NX6ZvmfOn2wiI7gKuu6Wzo7V7PcDofzQ"
+  },
+  "http-method-as-scope": true,
+  "enforcement-mode": "PERMISSIVE",
+  "paths": [
+    {
+      "path": "/api/version",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/error",
+      "enforcement-mode": "DISABLED"
+    }
+  ]
+}

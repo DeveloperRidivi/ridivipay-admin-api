@@ -1,0 +1,77 @@
+name: ridivi-local
+
+services:
+
+  ## OPEN TELEMETRY ##
+  otel-lgtm:
+    image: grafana/otel-lgtm:latest
+    container_name: ridivi-otel-lgtm
+    ports:
+      - "8300:3000" # Grafana. User: admin, password: admin
+      - "4317:4317" # OpenTelemetry GRPC endpoint
+      - "4318:4318" # OpenTelemetry HTTP endpoint
+    networks:
+      - ridivi-dev-net
+    restart: unless-stopped
+    # Persistencia de la información generada en OpenTelemetry
+    volumes:
+      - otel_data:/var/lib/otel
+
+  ## KEYCLOAK POSTGRESQL SERVER ##
+  kc_postgresql:
+    container_name: ridivi-kc-postgresql
+    hostname: keycloak-postgresql
+    image: "percona/percona-distribution-postgresql:17-multi"
+    environment:
+      - POSTGRES_USER=kc_root
+      - POSTGRES_PASSWORD=z$X37aZ8E55@597Q
+      - POSTGRES_DB=kcdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - kc_postgres_data:/data/db
+      - ./containers/zoneinfo:/usr/share/zoneinfo
+    networks:
+      - ridivi-dev-net
+    restart: unless-stopped
+
+  ## KEYCLOAK SERVER ##
+  keycloak:
+    container_name: ridivi-keycloak
+    hostname: keycloak
+    image: quay.io/keycloak/keycloak:latest
+    command: [ "start-dev", "--hostname-backchannel-dynamic=true", "--features=passkeys" ] #
+    environment:
+      - KC_HTTP_PORT=9090
+      - KC_DB=postgres
+      - KC_DB_USERNAME=kc_root
+      - KC_DB_PASSWORD=z$X37aZ8E55@597Q
+      - KC_DB_URL=jdbc:postgresql://keycloak-postgresql:5432/kcdb
+      - KC_BOOTSTRAP_ADMIN_USERNAME=kc_admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=Pjo%7HeWE!6t0OWM
+      - KC_HOSTNAME=http://keycloak:9090             # Acceso Público
+      - KC_HOSTNAME_ADMIN=http://keycloak-priv:9999  # Acceso Privado
+    ports:
+      - '9090:9090'
+      - '9999:9090'
+    networks:
+      - ridivi-dev-net
+    #extra_hosts:
+    #  - "WIN-EHN3SQVGCHG.codestrux.local:172.16.248.132"
+    restart: unless-stopped
+    depends_on:
+      - kc_postgresql
+
+volumes:
+  kc_postgres_data:
+  otel_data:
+  sonarqube_data:
+  sonarqube_temp:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonarqube_postgresql:
+  sonarqube_postgresql_data:
+
+networks:
+  ridivi-dev-net:
+    driver: bridge
