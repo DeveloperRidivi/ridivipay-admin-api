@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Ignora configuración de Gradel ###
+gradle.properties
